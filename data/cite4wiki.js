@@ -1,26 +1,18 @@
-/* This code is subject to the GNU Lesser Public License, Version 3. */
+/* This code is subject to the GNU Affero Public License, Version 3. */
 /* ------------------------------------------------ */
 /*  Generate Wikipedia <ref>{{cite web...}}</ref>.  */
 /* ------------------------------------------------ */
-function initialize() {
-  var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].
-            getService(Components.interfaces.nsIRDFService);
-  var ds =  Components.classes["@mozilla.org/rdf/datasource;1?name=cite4wiki"].
-            getService(Components.interfaces.nsIRDFDataSource);
-  var rdfRes = RDF.GetResource("cite4wiki");
-  var screenXRes = RDF.GetResource("screenX");
-  var screenYRes = RDF.GetResource("screenY");
-  var screenX = ds.GetTarget(rdfRes, screenXRes, true).
-                QueryInterface(Components.interfaces.nsIRDFLiteral);
-  var screenY = ds.GetTarget(rdfRes, screenYRes, true).
-                QueryInterface(Components.interfaces.nsIRDFLiteral);
-  window.moveto(screenX.value, screenY.value);
-  window.sizetocontent();
-}
+
+self.port.on("generate", function(capture) {
+  generate('',capture);
+});
+
 function makeDateArray() {
   for (i = 0; i<makeDateArray.arguments.length; i++) this[i + 1] = makeDateArray.arguments[i];
 }
-function generate(dateStyle) {
+
+function generate(dateStyle, capture) {
+  var ctx = JSON.parse(capture);
 /* Window dressing. */
   var width = "400";
   var height = "300";
@@ -29,8 +21,8 @@ function generate(dateStyle) {
 //
 // ***************************************************************************
 /* The meat. */
-  var _url = window.content.document.location.href;
-  var _title = window.content.document.title;
+  var _url = ctx["url"];
+  var _title = ctx["title"];
     /* Escape various characters to prevent potential problems, especially
        embedded wikicode being excecuted, accidentally or otherwise, and
        quotation mark cleanup: */
@@ -69,7 +61,7 @@ function generate(dateStyle) {
     The more specific window.content.document.commandDispatcher.focusedWindow...
     fails here.  Another method said to work
     is document.getElementById('canvas_frame').contentWindow... */
-  var _quote = document.commandDispatcher.focusedWindow.getSelection().toString();
+  var _quote = ctx["quote"];
     //Handle different line endings:
     _quote = _quote.replace(/\r\n/g, "\n");
     _quote = _quote.replace(/\r/g, "\n");
@@ -94,7 +86,7 @@ function generate(dateStyle) {
     _quote = _quote.replace(/\n/g, " "); 
     var quoteLength = _quote.length;
     if (quoteLength > 1000) { _quote = _quote + " {{err|{{HUGE QUOTE}}}}"; }
-  var _work = window.content.document.domain;
+  var _work = ctx["domain"];
     /* Strip leading "www." from site name for "work" field; doesn't affect URL. */
     _work = _work.replace(/^www\./i, "");
   /* **************************************************************** */
@@ -341,7 +333,7 @@ function generate(dateStyle) {
     _loc  = "[[Brentwood, Essex]]";
     _type = "web";
   }
-  var _lyear = content.document.lastModified.substr(6,4); 
+  var _lyear = ctx["lastModified"].substr(6,4); 
   var adate = new Date();
   var ayear = adate.getFullYear(); 
   var amonth = adate.getMonth() + 1;
@@ -390,7 +382,9 @@ function generate(dateStyle) {
   txt = txt + " |accessdate=" + _adate;
   txt = txt + "}}";
   txt = txt + "</ref>";
-  window.openDialog('chrome://cite4wiki/content/cite4wikiref.xul', '_blank', 'chrome,'+cfg,txt);
+  console.log('Citation: '+txt);
+  // TODO: update GUI with draft generated citation
+  //window.openDialog('chrome://cite4wiki/content/cite4wikiref.xul', '_blank', 'chrome,'+cfg,txt);
 }
 function copy_clip(wikicode) {
 /* This code was borrored from the codebase.nl free software site (defunct). */
