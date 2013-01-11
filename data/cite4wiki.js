@@ -3,8 +3,25 @@
 /*  Generate Wikipedia <ref>{{cite web...}}</ref>.  */
 /* ------------------------------------------------ */
 
+function copy_clip() {
+  var wikicode = document.getElementById("tbox").value; // read textarea in case user edited the citation manually
+  self.port.emit("clip", wikicode);
+  document.getElementById("status").innerHTML = "<span style=\"color:green\">Copied! :)</span>";
+}
+function close_panel() {
+  self.port.emit("close");
+}
+
 self.port.on("generate", function(capture) {
-  generate('',capture);
+  citation = generate('',capture);
+  e = document.getElementById("tbox");
+  e.value = citation;
+  e = document.getElementById("close");
+  e.onclick = function() { close_panel(); };
+  e = document.getElementById("copy");
+  e.onclick = function() { copy_clip(); };
+  e = document.getElementById("copy_and_close");
+  e.onclick = function() { copy_clip(); close_panel(); }
 });
 
 function makeDateArray() {
@@ -383,28 +400,7 @@ function generate(dateStyle, capture) {
   txt = txt + "}}";
   txt = txt + "</ref>";
   console.log('Citation: '+txt);
+  return txt;
   // TODO: update GUI with draft generated citation
   //window.openDialog('chrome://cite4wiki/content/cite4wikiref.xul', '_blank', 'chrome,'+cfg,txt);
-}
-function copy_clip(wikicode) {
-/* This code was borrored from the codebase.nl free software site (defunct). */
-  // Enable a privilege:
-  // obsolete // netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
-  // Open clipboard interface:
-  var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
-  if (!clip) { return; }
-  // Make it transferable:
-  var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
-  if (!trans) { return; }
-  // Specify what data type we want to obtain (text in this case):
-  trans.addDataFlavor('text/unicode');
-  // New object is needed to store the transferable data:
-  var str = new Object();
-  str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-  str.data=wikicode;
-  trans.setTransferData("text/unicode",str,wikicode.length*2);
-  var clipid=Components.interfaces.nsIClipboard;
-  if (!clip) { return false; }
-  clip.setData(trans,null,clipid.kGlobalClipboard);  
-  return false;
 }

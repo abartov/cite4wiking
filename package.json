@@ -1,7 +1,16 @@
 {
     "name": "cite4wiking", 
-    "license": "MPL 2.0", 
-    "author": "Asaf Bartov", 
+    "license": "AGPL 3.0", 
+    "author": "Asaf Bartov <asaf.bartov@gmail.com>", 
+    "contributors": [
+      "Stanton McCandlish (SMcCandlish)",
+      "Unit 5",
+      "Jonathan E. Hochman (Jehochman)",
+      "Diego Cadogan (Manuar)",
+      "Ratel",
+      "Yojimbo Doodah",
+      "Mozilla.org (stock code)"
+    ],
     "version": "0.1", 
     "fullName": "cite4wiking", 
     "id": "jid1-AH8W9QhrPEUDaw", 
